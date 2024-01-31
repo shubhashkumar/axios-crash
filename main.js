@@ -1,3 +1,6 @@
+//Axios global
+axios.defaults.headers.common['X-Auth']="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+
 // GET REQUEST
 function getTodos() {
   console.log('GET Request');
@@ -81,7 +84,8 @@ function getData() {
 function customHeaders()
  {
   console.log('Custom Headers');
-  const config={
+  const config=
+  {
     headers:
     {
       'content-type':"application/json",
@@ -108,16 +112,67 @@ function customHeaders()
 // TRANSFORMING REQUESTS & RESPONSES
 function transformResponse() {
   console.log('Transform Response');
+  const options={
+    method:"post",
+    url:"https://jsonplaceholder.typicode.com/todos",
+    data:
+    {
+      title:"hello world"
+    },
+    transformResponse:axios.defaults.transformResponse.concat(data=>
+      {
+        data.title=data.title.toUpperCase();
+        return data;
+      })
+  }
+  axios(options).then(res=>{showOutput(res)});
+
 }
 
 // ERROR HANDLING
-function errorHandling() {
-  console.log('Error Handling');
+function errorHandling() 
+{
+ 
+  axios
+   .get("https://jsonplaceholder.typicode.com/todoss")
+   .then(res=>showOutput(res))
+   .catch(err=>{
+    if(err.response)
+    {
+      //server responses other than 200
+      console.log(err.response.data);
+      console.log(err.response.status);
+      console.log(err.response.headers);
+      if(err.response.status===404)
+      {
+        alert("error:page not found");
+      }
+    }
+   });
 }
+
 
 // CANCEL TOKEN
 function cancelToken() {
   console.log('Cancel Token');
+  const source=axios.CancelToken.source();
+  axios
+   .get("https://jsonplaceholder.typicode.com/todos",
+   {
+     cancelToken:source.token
+   })
+   .then(res=>showOutput(res))
+   .catch(thrown=>
+    {
+       if(axios.isCancel(thrown))
+       {
+        console.log("request cancelled:",thrown.messsage);
+       }
+    })
+  if(true)
+  {
+    source.cancel("request cancel");
+  }
 }
 
 // INTERCEPTING REQUESTS & RESPONSES
@@ -177,8 +232,6 @@ document.getElementById('update').addEventListener('click', updateTodo);
 document.getElementById('delete').addEventListener('click', removeTodo);
 document.getElementById('sim').addEventListener('click', getData);
 document.getElementById('headers').addEventListener('click', customHeaders);
-document
-  .getElementById('transform')
-  .addEventListener('click', transformResponse);
+document.getElementById('transform').addEventListener('click', transformResponse);
 document.getElementById('error').addEventListener('click', errorHandling);
 document.getElementById('cancel').addEventListener('click', cancelToken);
